@@ -3,4 +3,8 @@ Installers And Info
 <div align="center">
 btrfsrsync will rsync a live enviroments contents to a drive
 <div align="center">
-btrfsrsyncimg currently broken will mount a .img and rsync its contents to a drive 
+btrfsrsyncimg will mount a .img and rsync its contents to a drive 
+<div align="center">
+btrfsrsyncimg usage execute script with pathandname.img
+<div align="center">
+you will need btrfsrsyncps2 installed to /opt/btrfs-installer
