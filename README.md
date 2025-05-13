@@ -4,7 +4,7 @@ Script To Install Latest Apex Updates currently supported as btrfs or ext4 from 
 <div align="center">
 the default advised method to install apex now is as partiton 3 for efi and partition 4 for root 
 <div align="center">
-  this will allow the .img to be a recovery on partition 1 essentially keeping you safe and LTS
+  this will allow the .img to be a recovery on partition 1 and 2 essentially keeping you safe and LTS
 <div align="center">
 i plan to build a custom .img that uses a overlayed squashfs 
   <div align="center">
