@@ -1,6 +1,6 @@
 # ApexSystemInstaller
 <div align="center">
-Script To Install Latest Apex Updates as btrfs or ext4 from .img or iso 
+Script To Install Latest Apex Updates currently supported as btrfs or ext4 from .img or iso
 <div align="center">
 the default advised method to install apex now is as partiton 3 for efi and partition 4 for root 
 <div align="center">
