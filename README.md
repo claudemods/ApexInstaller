@@ -11,3 +11,6 @@ i plan to build a custom .img that uses a overlayed squashfs
   this will allow the .img to be the ultimate lightweight recovery with kde as a gui!
 
 ![Screenshot_archlinux_2025-05-13_03:52:10](https://github.com/user-attachments/assets/3ac54793-55a2-4293-ab8a-aa680fe18eb5)
+
+![Screenshot_20250513_040949](https://github.com/user-attachments/assets/f4dbae7c-f775-4c98-9a5d-1fbde647c437)
+
