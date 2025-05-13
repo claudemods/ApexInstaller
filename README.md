@@ -8,4 +8,4 @@ the default advised method to install apex now is as partiton 2 for efi and part
 <div align="center">
 i plan to build a custom .img that uses a overlayed squashfs 
   <div align="center">
-  this will allow the .img to be the ultimate lightweight recovery
+  this will allow the .img to be the ultimate lightweight recovery with kde as a gui!
