@@ -46,7 +46,7 @@ sudo mount --bind /sys "$MOUNT_POINT/sys"
 sudo mount --bind /run "$MOUNT_POINT/run"
 
 echo "Executing /opt/Arch-Systemtool/btrfsrsync in chroot..."
-sudo chroot "$MOUNT_POINT" /bin/env PATH=/bin:/usr/bin /opt/Arch-Systemtool/btrfsrsync
+sudo chroot "$MOUNT_POINT" /bin/env PATH=/bin:/usr/bin /opt/Arch-Systemtool/btrfsrsyncps1
 
 # Unmount all bind mounts
 sudo umount "$MOUNT_POINT/dev/pts"
