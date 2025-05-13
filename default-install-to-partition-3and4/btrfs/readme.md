@@ -5,6 +5,6 @@ btrfsrsync will rsync a live enviroments contents to a drive
 <div align="center">
 btrfsrsyncimg will mount a .img and rsync its contents to a drive 
 <div align="center">
-btrfsrsyncimg usage execute script with pathandname.img
+btrfsrsyncimg usage execute script with pathandname.img e.g btrfsrsync /run/media/apex/Ventoy/Apex-CKGE-Minimal-v1.03.img
 <div align="center">
 you will need btrfsrsyncps2 installed to /opt/btrfs-installer
