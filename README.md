@@ -6,4 +6,6 @@ the default advised method to install apex now is as partiton 2 for efi and part
 <div align="center">
   this will allow the .img to be a recovery on partition 1 essentially keeping you safe and LTS
 <div align="center">
-i plan to build a custom .img that uses a overlayed squashfs this will allow to be the ultimate lightweight recovery
+i plan to build a custom .img that uses a overlayed squashfs 
+  <div align="center">
+  this will allow the .img to be the ultimate lightweight recovery
