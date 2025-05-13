@@ -37,7 +37,7 @@ int main() {
 ╚█████╔╝███████╗██║░░██║╚██████╔╝██████╔╝███████╗██║░╚═╝░██║╚█████╔╝██████╔╝██████╔╝
 ░╚════╝░╚══════╝╚═╝░░░░░░╚═════╝░╚═════╝░╚══════╝╚═╝░░░░░╚═╝░╚════╝░╚═════╝░╚═════╝░)" << endl;
 cout << "\033[38;2;0;255;255m";
-cout << "claudemods Apex Installer v1.0\n\n";
+cout << "claudemods Apex System Installer v1.0\n\n";
 
 // Display menu options
 auto options = getEmbeddedMenuOptions();
