@@ -123,7 +123,7 @@ int main() {
 
     // Create partition table
     cout << COLOR_CYAN << "Creating partition table..." << COLOR_RESET << endl;
-    execute_command("wipefs --all + drive +");
+    execute_command("wipefs --all " + drive);
     execute_command("parted " + drive + " mklabel gpt");
     execute_command("parted " + drive + " mkpart primary fat32 1MiB 551MiB");
     execute_command("parted " + drive + " mkpart primary btrfs 551MiB 100%");
@@ -182,6 +182,25 @@ int main() {
     execute_command("chown $USER /mnt/root/home");
     execute_command("mount " + efi_part + " /mnt/root/boot/efi");
 
+    // --- FSTAB (WITH FALLBACK) ---
+    cout << COLOR_CYAN << "Generating fstab..." << COLOR_RESET << endl;
+    execute_command("mkdir -p /mnt/etc");
+    string fstab_cmd = "if ! genfstab -U /mnt > /mnt/root/etc/fstab 2>/dev/null; then "
+                       "EFI_UUID=$(lsblk -no UUID " + efi_part + "); "
+                       "ROOT_UUID=$(lsblk -no UUID " + root_part + "); "
+                       "tee /mnt/etc/fstab <<EOF\n"
+                       "UUID=$EFI_UUID  /boot/efi  vfat  umask=0077 0 2\n"
+                       "UUID=$ROOT_UUID  /          btrfs  subvol=@,compress=zstd 0 0\n"
+                       "UUID=$ROOT_UUID  /home      btrfs  subvol=@home,compress=zstd 0 0\n"
+                       "UUID=$ROOT_UUID  /root      btrfs  subvol=@root,compress=zstd 0 0\n"
+                       "UUID=$ROOT_UUID  /srv       btrfs  subvol=@srv,compress=zstd 0 0\n"
+                       "UUID=$ROOT_UUID  /var/cache btrfs  subvol=@cache,compress=zstd 0 0\n"
+                       "UUID=$ROOT_UUID  /tmp       btrfs  subvol=@tmp,compress=zstd 0 0\n"
+                       "UUID=$ROOT_UUID  /var/log   btrfs  subvol=@log,compress=zstd 0 0\n"
+                       "EOF\n"
+                       "fi";
+    execute_command(fstab_cmd);
+
     // GRUB installation
     cout << COLOR_CYAN << "Installing GRUB..." << COLOR_RESET << endl;
     execute_command("mount -o subvol=@root " + root_part + " /mnt/root");
@@ -193,7 +212,6 @@ int main() {
     execute_command("mount --bind /run /mnt/root/run");
 
     execute_command("chroot /mnt/root /bin/bash -c \""
-    "rm -f /etc/fstab && "
     "if ! mountpoint -q /boot/efi; then "
     "   echo 'ERROR: /boot/efi not mounted!'; "
     "   exit 1; "
