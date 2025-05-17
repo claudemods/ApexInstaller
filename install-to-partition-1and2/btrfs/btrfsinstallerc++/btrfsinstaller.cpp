@@ -123,6 +123,7 @@ int main() {
 
     // Create partition table
     cout << COLOR_CYAN << "Creating partition table..." << COLOR_RESET << endl;
+    execute_command("wipefs --all + drive +");
     execute_command("parted " + drive + " mklabel gpt");
     execute_command("parted " + drive + " mkpart primary fat32 1MiB 551MiB");
     execute_command("parted " + drive + " mkpart primary btrfs 551MiB 100%");
@@ -168,7 +169,6 @@ int main() {
     // Create system snapshot
     cout << COLOR_CYAN << "Creating system snapshot..." << COLOR_RESET << endl;
     execute_command("btrfs subvolume snapshot / /home/" + username + "/fullsystem");
-    execute_command("sudo rm -rf /home/" + username + "/fullsystem/opt/btrfssystemcloner");
     execute_command("sudo btrfs property set -ts /home/" + username + "/fullsystem ro true");
     execute_command("mksquashfs /home/" + username + "/fullsystem /home/" + username + "/system.sfs -no-duplicates -no-recovery -always-use-fragments -wildcards -xattrs");
     execute_command("unsquashfs -f -d /mnt/root /home/" + username + "/system.sfs");
@@ -178,8 +178,6 @@ int main() {
     execute_command("rm /home/" + username + "/system.sfs");
     execute_command("rsync -aHAxSr --numeric-ids --info=progress2 /mnt/root/home /mnt/home/");
     execute_command("rm -rf /mnt/root/home");
-    execute_command("btrfs subvolume delete /home/" + username + "/homebackup");
-    execute_command("rm /home/" + username + "/home.sfs");
     execute_command("chown $USER /mnt/home");
     execute_command("chown $USER /mnt/root/home");
     execute_command("mount " + efi_part + " /mnt/root/boot/efi");
