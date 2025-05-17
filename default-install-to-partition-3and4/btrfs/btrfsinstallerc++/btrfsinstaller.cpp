@@ -55,7 +55,7 @@ void display_header() {
 ╚█████╔╝███████╗██║░░██║╚██████╔╝██████╔╝███████╗██║░╚═╝░██║╚█████╔╝██████╔╝██████╔╝
 ░╚════╝░╚══════╝╚═╝░░░░░░╚═════╝░╚═════╝░╚══════╝╚═╝░░░░░╚═╝░╚════╝░╚═════╝░╚═════╝░
 )" << endl;
-    cout << COLOR_CYAN << "Btrfs System Installer v1.0 Build 17-05-2025" << COLOR_RESET << endl << endl;
+cout << COLOR_CYAN << "Btrfs System Installer v1.0 Build 17-05-2025" << COLOR_RESET << endl << endl;
 }
 
 void show_post_install_menu(const string& root_part, const string& efi_part) {
@@ -70,32 +70,32 @@ void show_post_install_menu(const string& root_part, const string& efi_part) {
 ║ 3. Exit                              ║
 ╚══════════════════════════════════════╝
 )" << endl;
-        cout << COLOR_CYAN << "Select option (1-3): " << COLOR_RESET;
+cout << COLOR_CYAN << "Select option (1-3): " << COLOR_RESET;
 
-        int choice;
-        cin >> choice;
-        cin.ignore();
+int choice;
+cin >> choice;
+cin.ignore();
 
-        switch(choice) {
-            case 1:
-                execute_command("mount -o subvol=@root " + root_part + " /mnt/root");
-                execute_command("mount " + efi_part + " /mnt/root/boot/efi");
-                execute_command("mount --bind /dev /mnt/root/dev");
-                execute_command("mount --bind /dev/pts /mnt/root/dev/pts");
-                execute_command("mount --bind /proc /mnt/root/proc");
-                execute_command("mount --bind /sys /mnt/root/sys");
-                execute_command("mount --bind /run /mnt/root/run");
-                execute_command("chroot /mnt/root /bin/bash");
-                break;
-            case 2:
-                execute_command("umount -a");
-                execute_command("reboot");
-                return;
-            case 3:
-                return;
-            default:
-                cout << COLOR_RED << "Invalid option!" << COLOR_RESET << endl;
-        }
+switch(choice) {
+    case 1:
+        execute_command("mount -o subvol=@root " + root_part + " /mnt/root");
+        execute_command("mount " + efi_part + " /mnt/root/boot/efi");
+        execute_command("mount --bind /dev /mnt/root/dev");
+        execute_command("mount --bind /dev/pts /mnt/root/dev/pts");
+        execute_command("mount --bind /proc /mnt/root/proc");
+        execute_command("mount --bind /sys /mnt/root/sys");
+        execute_command("mount --bind /run /mnt/root/run");
+        execute_command("chroot /mnt/root /bin/bash");
+        break;
+    case 2:
+        execute_command("umount -a");
+        execute_command("reboot");
+        return;
+    case 3:
+        return;
+    default:
+        cout << COLOR_RED << "Invalid option!" << COLOR_RESET << endl;
+}
     }
 }
 
@@ -123,6 +123,7 @@ int main() {
 
     // Create partition table
     cout << COLOR_CYAN << "Creating partition table..." << COLOR_RESET << endl;
+    execute_command("wipefs --all + drive +");
     execute_command("parted " + drive + " mklabel gpt");
     execute_command("parted " + drive + " mkpart primary fat32 1MiB 551MiB");
     execute_command("parted " + drive + " mkpart primary btrfs 551MiB 100%");
@@ -168,7 +169,6 @@ int main() {
     // Create system snapshot
     cout << COLOR_CYAN << "Creating system snapshot..." << COLOR_RESET << endl;
     execute_command("btrfs subvolume snapshot / /home/" + username + "/fullsystem");
-    execute_command("sudo rm -rf /home/" + username + "/fullsystem/opt/btrfssystemcloner");
     execute_command("sudo btrfs property set -ts /home/" + username + "/fullsystem ro true");
     execute_command("mksquashfs /home/" + username + "/fullsystem /home/" + username + "/system.sfs -no-duplicates -no-recovery -always-use-fragments -wildcards -xattrs");
     execute_command("unsquashfs -f -d /mnt/root /home/" + username + "/system.sfs");
@@ -178,8 +178,6 @@ int main() {
     execute_command("rm /home/" + username + "/system.sfs");
     execute_command("rsync -aHAxSr --numeric-ids --info=progress2 /mnt/root/home /mnt/home/");
     execute_command("rm -rf /mnt/root/home");
-    execute_command("btrfs subvolume delete /home/" + username + "/homebackup");
-    execute_command("rm /home/" + username + "/home.sfs");
     execute_command("chown $USER /mnt/home");
     execute_command("chown $USER /mnt/root/home");
     execute_command("mount " + efi_part + " /mnt/root/boot/efi");
@@ -234,4 +232,4 @@ int main() {
     show_post_install_menu(root_part, efi_part);
 
     return 0;
-}
+    }
