@@ -55,7 +55,7 @@ void display_header() {
 ╚█████╔╝███████╗██║░░██║╚██████╔╝██████╔╝███████╗██║░╚═╝░██║╚█████╔╝██████╔╝██████╔╝
 ░╚════╝░╚══════╝╚═╝░░░░░░╚═════╝░╚═════╝░╚══════╝╚═╝░░░░░╚═╝░╚════╝░╚═════╝░╚═════╝░
 )" << endl;
-    cout << COLOR_CYAN << "Btrfs System Cloner v1.02 Build 17-05-2025" << COLOR_RESET << endl << endl;
+    cout << COLOR_CYAN << "Btrfs System Installer v1.0 Build 17-05-2025" << COLOR_RESET << endl << endl;
 }
 
 void show_post_install_menu(const string& root_part, const string& efi_part) {
