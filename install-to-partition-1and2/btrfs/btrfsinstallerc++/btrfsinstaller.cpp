@@ -185,7 +185,7 @@ int main() {
     // --- FSTAB (WITH FALLBACK) ---
     cout << COLOR_CYAN << "Generating fstab..." << COLOR_RESET << endl;
     execute_command("mkdir -p /mnt/etc");
-    string fstab_cmd = "if ! genfstab -U /mnt > /mnt/etc/fstab 2>/dev/null; then "
+    string fstab_cmd = "if ! genfstab -U /mnt > /mnt/root/etc/fstab 2>/dev/null; then "
     "EFI_UUID=$(lsblk -no UUID " + efi_part + "); "
     "ROOT_UUID=$(lsblk -no UUID " + root_part + "); "
     "tee /mnt/etc/fstab <<EOF\n"
