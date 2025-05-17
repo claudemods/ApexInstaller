@@ -123,7 +123,6 @@ int main() {
 
     // Create partition table
     cout << COLOR_CYAN << "Creating partition table..." << COLOR_RESET << endl;
-    execute_command("wipefs --all + drive +");
     execute_command("parted " + drive + " mklabel gpt");
     execute_command("parted " + drive + " mkpart primary fat32 1MiB 551MiB");
     execute_command("parted " + drive + " mkpart primary btrfs 551MiB 100%");
