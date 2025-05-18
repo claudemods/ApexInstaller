@@ -193,7 +193,7 @@ int main() {
 
     // GRUB installation
     cout << COLOR_CYAN << "Installing GRUB..." << COLOR_RESET << endl;
-    execute_command("mount -o subvol=@root " + root_part + " /mnt/root");
+    execute_command("mount -o subvol=@ " + root_part + " /mnt/@");
     execute_command("mount " + efi_part + " /mnt/@/boot/efi");
     execute_command("mount --bind /dev /mnt/@/dev");
     execute_command("mount --bind /dev/pts /mnt/@/dev/pts");
@@ -203,15 +203,15 @@ int main() {
 
     // MODIFIED FSTAB GENERATION SECTION
     cout << COLOR_CYAN << "Generating fstab..." << COLOR_RESET << endl;
-    
+
     // Copy btrfsgenfstab.sh to chroot
     execute_command("mkdir -p /mnt/@/opt/btrfsgenfstab");
     execute_command("cp btrfsgenfstab.sh /mnt/@/opt/btrfsgenfstab/");
     execute_command("chmod +x /mnt/@/opt/btrfsgenfstab/btrfsgenfstab.sh");
-    
+
     // Execute the script in chroot
     execute_command("chroot /mnt/@ /opt/btrfsgenfstab/btrfsgenfstab.sh");
-    
+
     // Verify fstab was created
     ifstream fstab_check("/mnt/@/etc/fstab");
     if (!fstab_check.good()) {
@@ -260,4 +260,4 @@ int main() {
     show_post_install_menu(root_part, efi_part);
 
     return 0;
-}
+    }
