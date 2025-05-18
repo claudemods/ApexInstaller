@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <cstdint>
 #include <cstdio>
+#include <fstream>
 
 using namespace std;
 
@@ -192,36 +193,22 @@ int main() {
     execute_command("mount --bind /sys /mnt/root/sys");
     execute_command("mount --bind /run /mnt/root/run");
 
-    // Fstab generation with fallback - YOUR REQUESTED IMPLEMENTATION
-    std::cout << COLOR_CYAN << "Generating fstab..." << COLOR_RESET << endl;
-    execute_command("mkdir -p /mnt/root/etc");
-    if (std::system("genfstab -U /mnt > /mnt/root/etc/fstab 2>/dev/null") != 0) {
-        std::string efi_uuid_cmd = "blkid -s UUID -o value " + efi_part;
-        std::string root_uuid_cmd = "blkid -s UUID -o value " + root_part;
-
-        std::string efi_uuid_str = exec(efi_uuid_cmd.c_str());
-        std::string root_uuid_str = exec(root_uuid_cmd.c_str());
-
-        efi_uuid_str.erase(efi_uuid_str.find_last_not_of(" \n\r\t")+1);
-        root_uuid_str.erase(root_uuid_str.find_last_not_of(" \n\r\t")+1);
-
-        std::string fstab =
-        "UUID=" + efi_uuid_str + "  /root/boot/efi  vfat  umask=0077 0 2\n" +
-        "UUID=" + root_uuid_str + "  /          btrfs  subvol=@,compress=zstd 0 0\n" +
-        "UUID=" + root_uuid_str + "  /home      btrfs  subvol=@home,compress=zstd 0 0\n" +
-        "UUID=" + root_uuid_str + "  /root      btrfs  subvol=@root,compress=zstd 0 0\n" +
-        "UUID=" + root_uuid_str + "  /srv       btrfs  subvol=@srv,compress=zstd 0 0\n" +
-        "UUID=" + root_uuid_str + "  /var/cache btrfs  subvol=@cache,compress=zstd 0 0\n" +
-        "UUID=" + root_uuid_str + "  /tmp       btrfs  subvol=@tmp,compress=zstd 0 0\n" +
-        "UUID=" + root_uuid_str + "  /var/log   btrfs  subvol=@log,compress=zstd 0 0\n";
-
-        FILE* f = fopen("/mnt/root/etc/fstab", "w");
-        if (f) {
-            fwrite(fstab.c_str(), 1, fstab.size(), f);
-            fclose(f);
-        } else {
-            cerr << COLOR_RED << "Error: Failed to write fstab file" << COLOR_RESET << endl;
-        }
+    // MODIFIED FSTAB GENERATION SECTION
+    cout << COLOR_CYAN << "Generating fstab..." << COLOR_RESET << endl;
+    
+    // Copy btrfsgenfstab.sh to chroot
+    execute_command("mkdir -p /mnt/root/opt/btrfsgenfstab");
+    execute_command("cp btrfsgenfstab.sh /mnt/root/opt/btrfsgenfstab/");
+    execute_command("chmod +x /mnt/root/opt/btrfsgenfstab/btrfsgenfstab.sh");
+    
+    // Execute the script in chroot
+    execute_command("chroot /mnt/root /opt/btrfsgenfstab/btrfsgenfstab.sh");
+    
+    // Verify fstab was created
+    ifstream fstab_check("/mnt/root/etc/fstab");
+    if (!fstab_check.good()) {
+        cerr << COLOR_RED << "Error: Failed to generate fstab using btrfsgenfstab.sh" << COLOR_RESET << endl;
+        return 1;
     }
 
     // Continue with GRUB installation
@@ -264,4 +251,4 @@ int main() {
     show_post_install_menu(root_part, efi_part);
 
     return 0;
-    }
+}
