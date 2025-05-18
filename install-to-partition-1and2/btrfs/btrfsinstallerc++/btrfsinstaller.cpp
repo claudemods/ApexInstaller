@@ -186,7 +186,7 @@ int main() {
     // Home snapshot
     execute_command("btrfs subvolume delete /home/" + username + "/fullsystem");
     execute_command("rsync -aHAxSr --numeric-ids --info=progress2 /mnt/@/home /mnt/");
-    execute_command("rm -rf /mnt/root/home");
+    execute_command("rm -rf /mnt/@/home");
     execute_command("chown $USER /mnt/home");
     execute_command("mount " + efi_part + " /mnt/root/boot/efi");
 
