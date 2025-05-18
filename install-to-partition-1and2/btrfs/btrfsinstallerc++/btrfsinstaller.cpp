@@ -180,12 +180,12 @@ int main() {
     execute_command("btrfs subvolume snapshot / /home/" + username + "/fullsystem");
     execute_command("sudo btrfs property set -ts /home/" + username + "/fullsystem ro true");
     execute_command("mksquashfs /home/" + username + "/fullsystem /mnt/root/system.sfs -no-duplicates -no-recovery -always-use-fragments -wildcards -xattrs");
-    execute_command("unsquashfs -f -d /mnt /mnt/root/system.sfs");
+    execute_command("unsquashfs -f -d /mnt/@ /mnt/root/system.sfs");
     execute_command("rm -rf /mnt/root/system.sfs");
 
     // Home snapshot
     execute_command("btrfs subvolume delete /home/" + username + "/fullsystem");
-    execute_command("rsync -aHAxSr --numeric-ids --info=progress2 /mnt/root/home /mnt/");
+    execute_command("rsync -aHAxSr --numeric-ids --info=progress2 /mnt/@/home /mnt/");
     execute_command("rm -rf /mnt/root/home");
     execute_command("chown $USER /mnt/home");
     execute_command("mount " + efi_part + " /mnt/root/boot/efi");
