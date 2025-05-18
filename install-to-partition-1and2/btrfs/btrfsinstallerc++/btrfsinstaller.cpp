@@ -80,15 +80,14 @@ cin.ignore();
 
 switch(choice) {
     case 1:
-        execute_command("mount -o subvol=@ " + root_part + " /mnt/@");
-        execute_command("mount " + efi_part + " /mnt/@/boot/efi");
+        execute_command("mount -o subvol=@ " + root_part + " /mnt");
+        execute_command("mount " + efi_part + " /mnt/boot/efi");
         execute_command("mount --bind /dev /mnt/dev");
         execute_command("mount --bind /dev/pts /mnt/dev/pts");
         execute_command("mount --bind /proc /mnt/proc");
         execute_command("mount --bind /sys /mnt/sys");
         execute_command("mount --bind /run /mnt/run");
         execute_command("chroot /mnt /bin/bash");
-        execute_command("umount -l /mnt/@");
         execute_command("umount -l /mnt/home");
         execute_command("umount -l /mnt/root");
         execute_command("umount -l /mnt/srv");
