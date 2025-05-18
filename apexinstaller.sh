@@ -35,13 +35,13 @@ case $choice in
         echo -e "\033[38;2;0;255;0m"  # Set text color to green
         echo "Starting Default Install To Drive 3 and 4..."
         echo -e "\033[0m"             # Reset text color
-        cd /opt/btrfs-installer/drive3and4 && btrfsinstaller
+        cd /opt/btrfs-installer/drive3and4 && ./btrfsinstaller
         ;;
     2)
         echo -e "\033[38;2;0;255;0m"  # Set text color to green
         echo "Starting Btrfs Install To Drive 1 and 2..."
         echo -e "\033[0m"             # Reset text color
-        cd /opt/btrfs-installer/drive1and2 && btrfsinstaller
+        cd /opt/btrfs-installer/drive1and2 && ./btrfsinstaller
         ;;
     *)
         echo -e "\033[38;2;255;0;0m"  # Set text color to red
