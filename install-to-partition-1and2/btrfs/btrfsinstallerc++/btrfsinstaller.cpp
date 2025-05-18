@@ -8,6 +8,7 @@
 #include <sstream>
 #include <iomanip>
 #include <cstdint>
+#include <cstdio>
 
 using namespace std;
 
@@ -191,62 +192,76 @@ int main() {
     execute_command("mount --bind /sys /mnt/root/sys");
     execute_command("mount --bind /run /mnt/root/run");
 
-    // ONLY FIXED SECTION - FSTAB GENERATION
-    cout << COLOR_CYAN << "Generating fstab..." << COLOR_RESET << endl;
-    string fstab_cmd =
-    "if ! genfstab -U /mnt > /mnt/root/etc/fstab 2>/dev/null; then "
-    "EFI_UUID=$(blkid -s UUID -o value " + efi_part + "); "
-    "ROOT_UUID=$(blkid -s UUID -o value " + root_part + "); "
-    "cat > /mnt/root/etc/fstab <<'EOF'\n"
-    "UUID=${EFI_UUID}  /root/boot/efi  vfat  umask=0077 0 2\n"
-    "UUID=${ROOT_UUID}  /          btrfs  subvol=@,compress=zstd 0 0\n"
-    "UUID=${ROOT_UUID}  /home      btrfs  subvol=@home,compress=zstd 0 0\n"
-    "UUID=${ROOT_UUID}  /root      btrfs  subvol=@root,compress=zstd 0 0\n"
-    "UUID=${ROOT_UUID}  /srv       btrfs  subvol=@srv,compress=zstd 0 0\n"
-    "UUID=${ROOT_UUID}  /var/cache btrfs  subvol=@cache,compress=zstd 0 0\n"
-    "UUID=${ROOT_UUID}  /tmp       btrfs  subvol=@tmp,compress=zstd 0 0\n"
-    "UUID=${ROOT_UUID}  /var/log   btrfs  subvol=@log,compress=zstd 0 0\n"
-    "EOF\n"
-    "fi";
-execute_command(fstab_cmd);
+    // Fstab generation with fallback - YOUR REQUESTED IMPLEMENTATION
+    std::cout << COLOR_CYAN << "Generating fstab..." << COLOR_RESET << endl;
+    execute_command("mkdir -p /mnt/root/etc");
+    if (std::system("genfstab -U /mnt > /mnt/root/etc/fstab 2>/dev/null") != 0) {
+        std::string efi_uuid_cmd = "blkid -s UUID -o value " + efi_part;
+        std::string root_uuid_cmd = "blkid -s UUID -o value " + root_part;
 
-execute_command("chroot /mnt/root /bin/bash -c \""
-"if ! mountpoint -q /boot/efi; then "
-"   echo 'ERROR: /boot/efi not mounted!'; "
-"   exit 1; "
-"fi; "
-"grub-install --target=x86_64-efi "
-"--efi-directory=/boot/efi "
-"--bootloader-id=GRUB "
-"--recheck || { "
-"   echo 'GRUB install failed, trying fallback...'; "
-"   grub-install --target=x86_64-efi "
-"   --efi-directory=/boot/efi "
-"   --bootloader-id=GRUB "
-"   --removable; "
-"}; "
-"if command -v efibootmgr >/dev/null; then "
-"   efibootmgr --create "
-"   --disk " + drive + " "
-"   --part 1 "
-"   --loader /EFI/GRUB/grubx64.efi "
-"   --label 'GRUB'; "
-"fi; "
-"grub-mkconfig -o /boot/grub/grub.cfg; "
-"mkinitcpio -P\"");
+        std::string efi_uuid_str = exec(efi_uuid_cmd.c_str());
+        std::string root_uuid_str = exec(root_uuid_cmd.c_str());
 
-// Cleanup
-cout << COLOR_CYAN << "Cleaning up..." << COLOR_RESET << endl;
-execute_command("umount -l /mnt/home");
-execute_command("umount -l /mnt/root");
-execute_command("umount -l /mnt/srv");
-execute_command("umount -l /mnt/var/cache");
-execute_command("umount -l /mnt/tmp");
-execute_command("umount -l /mnt/var/log");
-execute_command("umount -l /mnt");
+        efi_uuid_str.erase(efi_uuid_str.find_last_not_of(" \n\r\t")+1);
+        root_uuid_str.erase(root_uuid_str.find_last_not_of(" \n\r\t")+1);
 
-// Show post-install menu
-show_post_install_menu(root_part, efi_part);
+        std::string fstab =
+        "UUID=" + efi_uuid_str + "  /root/boot/efi  vfat  umask=0077 0 2\n" +
+        "UUID=" + root_uuid_str + "  /          btrfs  subvol=@,compress=zstd 0 0\n" +
+        "UUID=" + root_uuid_str + "  /home      btrfs  subvol=@home,compress=zstd 0 0\n" +
+        "UUID=" + root_uuid_str + "  /root      btrfs  subvol=@root,compress=zstd 0 0\n" +
+        "UUID=" + root_uuid_str + "  /srv       btrfs  subvol=@srv,compress=zstd 0 0\n" +
+        "UUID=" + root_uuid_str + "  /var/cache btrfs  subvol=@cache,compress=zstd 0 0\n" +
+        "UUID=" + root_uuid_str + "  /tmp       btrfs  subvol=@tmp,compress=zstd 0 0\n" +
+        "UUID=" + root_uuid_str + "  /var/log   btrfs  subvol=@log,compress=zstd 0 0\n";
 
-return 0;
-}
+        FILE* f = fopen("/mnt/root/etc/fstab", "w");
+        if (f) {
+            fwrite(fstab.c_str(), 1, fstab.size(), f);
+            fclose(f);
+        } else {
+            cerr << COLOR_RED << "Error: Failed to write fstab file" << COLOR_RESET << endl;
+        }
+    }
+
+    // Continue with GRUB installation
+    execute_command("chroot /mnt/root /bin/bash -c \""
+    "if ! mountpoint -q /boot/efi; then "
+    "   echo 'ERROR: /boot/efi not mounted!'; "
+    "   exit 1; "
+    "fi; "
+    "grub-install --target=x86_64-efi "
+    "--efi-directory=/boot/efi "
+    "--bootloader-id=GRUB "
+    "--recheck || { "
+    "   echo 'GRUB install failed, trying fallback...'; "
+    "   grub-install --target=x86_64-efi "
+    "   --efi-directory=/boot/efi "
+    "   --bootloader-id=GRUB "
+    "   --removable; "
+    "}; "
+    "if command -v efibootmgr >/dev/null; then "
+    "   efibootmgr --create "
+    "   --disk " + drive + " "
+    "   --part 1 "
+    "   --loader /EFI/GRUB/grubx64.efi "
+    "   --label 'GRUB'; "
+    "fi; "
+    "grub-mkconfig -o /boot/grub/grub.cfg; "
+    "mkinitcpio -P\"");
+
+    // Cleanup
+    cout << COLOR_CYAN << "Cleaning up..." << COLOR_RESET << endl;
+    execute_command("umount -l /mnt/home");
+    execute_command("umount -l /mnt/root");
+    execute_command("umount -l /mnt/srv");
+    execute_command("umount -l /mnt/var/cache");
+    execute_command("umount -l /mnt/tmp");
+    execute_command("umount -l /mnt/var/log");
+    execute_command("umount -l /mnt");
+
+    // Show post-install menu
+    show_post_install_menu(root_part, efi_part);
+
+    return 0;
+    }
