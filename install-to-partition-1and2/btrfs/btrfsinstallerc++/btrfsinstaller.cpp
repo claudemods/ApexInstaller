@@ -181,38 +181,34 @@ int main() {
     execute_command("chown $USER /mnt/home");
     execute_command("mount " + efi_part + " /mnt/root/boot/efi");
 
-// GRUB installation
-cout << COLOR_CYAN << "Installing GRUB..." << COLOR_RESET << endl;
-execute_command("mount -o subvol=@root " + root_part + " /mnt/root");
-execute_command("mount " + efi_part + " /mnt/root/boot/efi");
-execute_command("mount --bind /dev /mnt/root/dev");
-execute_command("mount --bind /dev/pts /mnt/root/dev/pts");
-execute_command("mount --bind /proc /mnt/root/proc");
-execute_command("mount --bind /sys /mnt/root/sys");
-execute_command("mount --bind /run /mnt/root/run");
+    // GRUB installation
+    cout << COLOR_CYAN << "Installing GRUB..." << COLOR_RESET << endl;
+    execute_command("mount -o subvol=@root " + root_part + " /mnt/root");
+    execute_command("mount " + efi_part + " /mnt/root/boot/efi");
+    execute_command("mount --bind /dev /mnt/root/dev");
+    execute_command("mount --bind /dev/pts /mnt/root/dev/pts");
+    execute_command("mount --bind /proc /mnt/root/proc");
+    execute_command("mount --bind /sys /mnt/root/sys");
+    execute_command("mount --bind /run /mnt/root/run");
 
-// --- FSTAB (WITH FALLBACK) ---
-cout << COLOR_CYAN << "Generating fstab..." << COLOR_RESET << endl;
-execute_command("mkdir -p /mnt/root/etc");
-string fstab_cmd = R"(
-if ! genfstab -U /mnt > /mnt/root/etc/fstab 2>/dev/null; then
-    EFI_UUID=$(blkid -s UUID -o value )" + efi_part + R"()
-    ROOT_UUID=$(blkid -s UUID -o value )" + root_part + R"()
-    mkdir -p /mnt/root/etc
-    cat > /mnt/root/etc/fstab <<EOF
-    UUID=${EFI_UUID}  /root/boot/efi  vfat  umask=0077 0 2
-    UUID=${ROOT_UUID}  /          btrfs  subvol=@,compress=zstd 0 0
-    UUID=${ROOT_UUID}  /home      btrfs  subvol=@home,compress=zstd 0 0
-    UUID=${ROOT_UUID}  /root      btrfs  subvol=@root,compress=zstd 0 0
-    UUID=${ROOT_UUID}  /srv       btrfs  subvol=@srv,compress=zstd 0 0
-    UUID=${ROOT_UUID}  /var/cache btrfs  subvol=@cache,compress=zstd 0 0
-    UUID=${ROOT_UUID}  /tmp       btrfs  subvol=@tmp,compress=zstd 0 0
-    UUID=${ROOT_UUID}  /var/log   btrfs  subvol=@log,compress=zstd 0 0
-    EOF
-    fi
-    )";
+    // ONLY FIXED SECTION - FSTAB GENERATION
+    cout << COLOR_CYAN << "Generating fstab..." << COLOR_RESET << endl;
+    string fstab_cmd =
+    "if ! genfstab -U /mnt > /mnt/root/etc/fstab 2>/dev/null; then "
+    "EFI_UUID=$(blkid -s UUID -o value " + efi_part + "); "
+    "ROOT_UUID=$(blkid -s UUID -o value " + root_part + "); "
+    "cat > /mnt/root/etc/fstab <<'EOF'\n"
+    "UUID=${EFI_UUID}  /root/boot/efi  vfat  umask=0077 0 2\n"
+    "UUID=${ROOT_UUID}  /          btrfs  subvol=@,compress=zstd 0 0\n"
+    "UUID=${ROOT_UUID}  /home      btrfs  subvol=@home,compress=zstd 0 0\n"
+    "UUID=${ROOT_UUID}  /root      btrfs  subvol=@root,compress=zstd 0 0\n"
+    "UUID=${ROOT_UUID}  /srv       btrfs  subvol=@srv,compress=zstd 0 0\n"
+    "UUID=${ROOT_UUID}  /var/cache btrfs  subvol=@cache,compress=zstd 0 0\n"
+    "UUID=${ROOT_UUID}  /tmp       btrfs  subvol=@tmp,compress=zstd 0 0\n"
+    "UUID=${ROOT_UUID}  /var/log   btrfs  subvol=@log,compress=zstd 0 0\n"
+    "EOF\n"
+    "fi";
 execute_command(fstab_cmd);
-
 
 execute_command("chroot /mnt/root /bin/bash -c \""
 "if ! mountpoint -q /boot/efi; then "
