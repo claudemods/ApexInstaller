@@ -181,7 +181,7 @@ int main() {
     execute_command("btrfs subvolume snapshot / /home/" + username + "/fullsystem");
     execute_command("sudo btrfs property set -ts /home/" + username + "/fullsystem ro true");
     execute_command("mksquashfs /home/" + username + "/fullsystem /mnt/root/system.sfs -no-duplicates -no-recovery -always-use-fragments -wildcards -xattrs");
-    execute_command("unsquashfs -f -d /mnt/ /mnt/root/system.sfs");
+    execute_command("unsquashfs -f -d /mnt /mnt/root/system.sfs");
     execute_command("rm -rf /mnt/root/system.sfs");
 
     // Home snapshot
