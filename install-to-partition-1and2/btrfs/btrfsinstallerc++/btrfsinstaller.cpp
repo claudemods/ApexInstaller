@@ -243,7 +243,6 @@ int main() {
 
     // Cleanup
     cout << COLOR_CYAN << "Cleaning up..." << COLOR_RESET << endl;
-    execute_command("umount -l /mnt/@");
     execute_command("umount -l /mnt/home");
     execute_command("umount -l /mnt/root");
     execute_command("umount -l /mnt/srv");
