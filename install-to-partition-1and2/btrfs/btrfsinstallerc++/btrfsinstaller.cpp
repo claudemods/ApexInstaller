@@ -189,7 +189,7 @@ int main() {
     execute_command("rsync -aHAxSr --numeric-ids --info=progress2 /mnt/@/home /mnt/");
     execute_command("rm -rf /mnt/@/home");
     execute_command("chown $USER /mnt/home");
-    execute_command("mount " + efi_part + " /mnt/root/boot/efi");
+    execute_command("mount " + efi_part + " /mnt/@/boot/efi");
 
     // GRUB installation
     cout << COLOR_CYAN << "Installing GRUB..." << COLOR_RESET << endl;
