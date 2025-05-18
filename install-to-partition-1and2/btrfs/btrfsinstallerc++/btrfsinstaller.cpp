@@ -80,14 +80,15 @@ cin.ignore();
 
 switch(choice) {
     case 1:
-        execute_command("mount -o subvol=@root " + root_part + " /mnt/root");
-        execute_command("mount " + efi_part + " /mnt/root/boot/efi");
-        execute_command("mount --bind /dev /mnt/root/dev");
-        execute_command("mount --bind /dev/pts /mnt/root/dev/pts");
-        execute_command("mount --bind /proc /mnt/root/proc");
-        execute_command("mount --bind /sys /mnt/root/sys");
-        execute_command("mount --bind /run /mnt/root/run");
-        execute_command("chroot /mnt/root /bin/bash");
+        execute_command("mount -o subvol=@ " + root_part + " /mnt/@");
+        execute_command("mount " + efi_part + " /mnt/|@/boot/efi");
+        execute_command("mount --bind /dev /mnt/@/dev");
+        execute_command("mount --bind /dev/pts /mnt/@/dev/pts");
+        execute_command("mount --bind /proc /mnt/@/proc");
+        execute_command("mount --bind /sys /mnt/@/sys");
+        execute_command("mount --bind /run /mnt/@/run");
+        execute_command("chroot /mnt/@ /bin/bash");
+        execute_command("umount -l /mnt/@");
         execute_command("umount -l /mnt/home");
         execute_command("umount -l /mnt/root");
         execute_command("umount -l /mnt/srv");
@@ -193,33 +194,33 @@ int main() {
     // GRUB installation
     cout << COLOR_CYAN << "Installing GRUB..." << COLOR_RESET << endl;
     execute_command("mount -o subvol=@root " + root_part + " /mnt/root");
-    execute_command("mount " + efi_part + " /mnt/root/boot/efi");
-    execute_command("mount --bind /dev /mnt/root/dev");
-    execute_command("mount --bind /dev/pts /mnt/root/dev/pts");
-    execute_command("mount --bind /proc /mnt/root/proc");
-    execute_command("mount --bind /sys /mnt/root/sys");
-    execute_command("mount --bind /run /mnt/root/run");
+    execute_command("mount " + efi_part + " /mnt/@/boot/efi");
+    execute_command("mount --bind /dev /mnt/@/dev");
+    execute_command("mount --bind /dev/pts /mnt/@/dev/pts");
+    execute_command("mount --bind /proc /mnt/@/proc");
+    execute_command("mount --bind /sys /mnt/@/sys");
+    execute_command("mount --bind /run /mnt/@/run");
 
     // MODIFIED FSTAB GENERATION SECTION
     cout << COLOR_CYAN << "Generating fstab..." << COLOR_RESET << endl;
     
     // Copy btrfsgenfstab.sh to chroot
-    execute_command("mkdir -p /mnt/root/opt/btrfsgenfstab");
-    execute_command("cp btrfsgenfstab.sh /mnt/root/opt/btrfsgenfstab/");
-    execute_command("chmod +x /mnt/root/opt/btrfsgenfstab/btrfsgenfstab.sh");
+    execute_command("mkdir -p /mnt/@/opt/btrfsgenfstab");
+    execute_command("cp btrfsgenfstab.sh /mnt/@/opt/btrfsgenfstab/");
+    execute_command("chmod +x /mnt/@/opt/btrfsgenfstab/btrfsgenfstab.sh");
     
     // Execute the script in chroot
-    execute_command("chroot /mnt/root /opt/btrfsgenfstab/btrfsgenfstab.sh");
+    execute_command("chroot /mnt/@ /opt/btrfsgenfstab/btrfsgenfstab.sh");
     
     // Verify fstab was created
-    ifstream fstab_check("/mnt/root/etc/fstab");
+    ifstream fstab_check("/mnt/@/etc/fstab");
     if (!fstab_check.good()) {
         cerr << COLOR_RED << "Error: Failed to generate fstab using btrfsgenfstab.sh" << COLOR_RESET << endl;
         return 1;
     }
 
     // Continue with GRUB installation
-    execute_command("chroot /mnt/root /bin/bash -c \""
+    execute_command("chroot /mnt/@ /bin/bash -c \""
     "if ! mountpoint -q /boot/efi; then "
     "   echo 'ERROR: /boot/efi not mounted!'; "
     "   exit 1; "
@@ -246,6 +247,7 @@ int main() {
 
     // Cleanup
     cout << COLOR_CYAN << "Cleaning up..." << COLOR_RESET << endl;
+    execute_command("umount -l /mnt/@");
     execute_command("umount -l /mnt/home");
     execute_command("umount -l /mnt/root");
     execute_command("umount -l /mnt/srv");
