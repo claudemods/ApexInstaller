@@ -88,9 +88,16 @@ switch(choice) {
         execute_command("mount --bind /sys /mnt/root/sys");
         execute_command("mount --bind /run /mnt/root/run");
         execute_command("chroot /mnt/root /bin/bash");
+        execute_command("umount -l /mnt/home");
+        execute_command("umount -l /mnt/root");
+        execute_command("umount -l /mnt/srv");
+        execute_command("umount -l /mnt/var/cache");
+        execute_command("umount -l /mnt/tmp");
+        execute_command("umount -l /mnt/var/log");
+        execute_command("umount -l /mnt");
+        execute_command("exit");
         break;
     case 2:
-        execute_command("umount -a");
         execute_command("reboot");
         return;
     case 3:
